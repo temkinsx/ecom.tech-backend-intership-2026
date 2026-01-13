@@ -1,0 +1,277 @@
+openapi: 3.0.3
+info:
+  title: Todo HTTP API
+  version: 1.0.0
+  description: In-memory REST TODO service.
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /todos:
+    post:
+      summary: Create todo
+      operationId: createTodo
+      tags: [todos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTodoRequest"
+            examples:
+              example:
+                value:
+                  id: 1
+                  title: "Go to the store"
+                  description: "Buy eggs, bread, and milk"
+                  completed: false
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        "400":
+          description: Validation error or invalid JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidJson:
+                  value: { error: "invalid json" }
+                validation:
+                  value: { error: "validation error" }
+        "409":
+          description: Duplicate identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                duplicate:
+                  value: { error: "todo already exists" }
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: List todos
+      operationId: listTodos
+      tags: [todos]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoList"
+              examples:
+                empty:
+                  value: []
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /todos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Todo identifier
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+    get:
+      summary: Get todo
+      operationId: getTodoById
+      tags: [todos]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        "400":
+          description: Invalid id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidId:
+                  value: { error: "invalid id" }
+        "404":
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value: { error: "todo not found" }
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Update todo
+      operationId: updateTodo
+      tags: [todos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTodoRequest"
+            examples:
+              example:
+                value:
+                  title: "Go to the store"
+                  description: "Buy eggs, bread, milk, and cheese"
+                  completed: true
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        "400":
+          description: Validation error, invalid JSON, or invalid id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidJson:
+                  value: { error: "invalid json" }
+                validation:
+                  value: { error: "validation error" }
+                invalidId:
+                  value: { error: "invalid id" }
+        "404":
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value: { error: "todo not found" }
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Delete todo
+      operationId: deleteTodo
+      tags: [todos]
+      responses:
+        "204":
+          description: Deleted (no content)
+        "400":
+          description: Invalid id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidId:
+                  value: { error: "invalid id" }
+        "404":
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notFound:
+                  value: { error: "todo not found" }
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    Todo:
+      type: object
+      required: [id, title, description, completed]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: "Go to the store"
+        description:
+          type: string
+          example: "Buy eggs, bread, and milk"
+        completed:
+          type: boolean
+          example: false
+
+    TodoList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Todo"
+
+    CreateTodoRequest:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: "Go to the store"
+        description:
+          type: string
+          example: "Buy eggs, bread, and milk"
+        completed:
+          type: boolean
+          example: false
+
+    UpdateTodoRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          example: "Go to the store"
+        description:
+          type: string
+          example: "Buy eggs, bread, milk, and cheese"
+        completed:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: "validation error"
