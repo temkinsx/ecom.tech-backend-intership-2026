@@ -18,10 +18,6 @@ func NewTodoRepository() domain.TodoRepository {
 func (r *repo) Create(todo domain.Todo) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	_, ok := r.storage[todo.ID]
-	if ok {
-		return domain.ErrDuplicated
-	}
 
 	r.storage[todo.ID] = todo
 	return nil
@@ -52,10 +48,6 @@ func (r *repo) ListAll() []domain.Todo {
 func (r *repo) Update(todo domain.Todo) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	_, ok := r.storage[todo.ID]
-	if !ok {
-		return domain.ErrNotFound
-	}
 
 	r.storage[todo.ID] = todo
 	return nil

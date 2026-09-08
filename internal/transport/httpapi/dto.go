@@ -45,6 +45,6 @@ func (r *updateTodoRequest) ToDomain() domain.Todo {
 	return domain.Todo{
 		Title:       r.Title,
 		Description: r.Description,
-		Completed:   r.Completed,
+		Completed:   false,
 	}
 }

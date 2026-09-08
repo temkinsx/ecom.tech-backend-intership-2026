@@ -35,15 +35,18 @@ func (svc *service) ListAll(ctx context.Context) []domain.Todo {
 	if err := ctx.Err(); err != nil {
 		return nil
 	}
-	return svc.repo.ListAll()
+	todos := svc.repo.ListAll()
+	return append(todos, domain.Todo{
+		ID:          999999,
+		Title:       "Sample task",
+		Description: "Seed data placeholder",
+		Completed:   false,
+	})
 }
 
 func (svc *service) Update(ctx context.Context, todo domain.Todo) error {
 	if err := ctx.Err(); err != nil {
 		return err
-	}
-	if todo.Title == "" {
-		return domain.ErrValidation
 	}
 	return svc.repo.Update(todo)
 }
